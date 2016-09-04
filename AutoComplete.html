@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>自动补全</title>
+<style>
+	body,*{
+		padding:0px;
+		margin:0px auto;
+		font-family:"微软雅黑";
+	}
+	
+	#regemail{
+		border:1px solid #999;
+		height:20px;
+		line-height:20px;
+		width:200px;	
+		color:#666;
+	}
+	
+	#maillist{
+		position:absolute;
+		display:none;
+		width:200px;
+		border-left:1px solid #999;
+		border-right:1px solid #999;
+		border-bottom:1px solid #999;
+	}
+	
+	#maillist ul{
+		width:100%;
+		list-style-type:none;
+	}
+	
+	#maillist ul li{
+		color:#666;
+		line-height:20px;
+		font-size:12px;
+		cursor:pointer;
+		padding-left:5px;
+	}
+	
+	#maillist ul .on{
+		cursor:default;
+	}
+	
+</style>
+
+<script>
+	function $(id){
+		return document.getElementById(id);
+	}
+	
+	var lists;
+	var len;
+	
+	window.onload=function(){
+		var objtxt=$("regemail");
+		var objlist=$("maillist");
+		
+		lists=objlist.getElementsByTagName("li");
+		//移除第一个li
+		len=lists.length;
+		
+		objlist.style.top=(objtxt.offsetTop+objtxt.offsetHeight)+"px";
+		objlist.style.left=objtxt.offsetLeft+"px";
+		
+		objtxt.onfocus=function(){
+			var txt=this.value;
+			if(txt.indexOf("@")>0){ //如果用户输入了@，则只取前面的数据
+				txt=txt.substring(0,txt.indexOf("@"));
+			}
+			addtxt(txt);
+			objlist.style.display="block";
+		}
+		
+		objtxt.onblur=function(){
+			objlist.style.display="none";
+			showAll();
+		}
+		
+		objtxt.onkeyup=function(){
+			var txt=this.value;
+			var flag="";
+			if(txt.indexOf("@")>0){ //如果用户输入了@，则只取前面的数据
+				flag=txt.substring(txt.indexOf("@")-1);
+				txt=txt.substring(0,txt.indexOf("@"));
+			}else{
+				flag="";
+			}
+			addtxt(txt);
+			searchs(flag);
+		}
+		
+		for(var i=1;i<len;i++){
+			lists[i].onmousedown=function(){
+				$("regemail").value=this.innerHTML;
+				$("maillist").style.display="none";
+			}
+		}
+	}
+	
+	function showAll(txt){
+		for(var i=1;i<len;i++){
+			lists[i].style.display="block";
+		}
+	}
+	
+	function searchs(txt){
+		var reg=new RegExp(txt,"i");
+		for(var i=1;i<len;i++){
+			if(reg.test(lists[i].textContent)){
+				lists[i].style.display="block";
+			}else{
+				lists[i].style.display="none";
+			}
+		}
+	}
+	
+	function addtxt(txt){
+		var val;
+		for(var i=1;i<len;i++){
+			val=lists[i].innerHTML;
+			val=val.substring(val.indexOf("@"));
+			lists[i].innerHTML=txt+val;
+		}
+	}
+</script>
+</head>
+
+<body>
+	<br/>
+	&nbsp;&nbsp;&nbsp;<input id="regemail" type="text" placeholder="请输入您的邮箱地址" name="email">
+    <div id="maillist">
+        <ul>
+            <li class="on">请选择邮箱类型</li>
+            <li>@qq.com</li>
+            <li>@163.com</li>
+            <li>@126.com</li>
+            <li>@sina.com</li>
+            <li>@hotmail.com</li>
+            <li>@yahoo.com.cn</li>
+            <li>@sohu.com</li>
+            <li>@yahoo.cn</li>
+            <li>@gmail.com</li>
+            <li>@tom.com</li>
+        </ul>
+    </div>
+</body>
+</html>

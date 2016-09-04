@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>助记码</title>
+	<script>
+		var shortcut = {sz:"深圳",zh:"珠海",sy:"沈阳",hn:"湖南",hb:"湖北"}; 
+		
+		function shortcutCode(){
+			//1.失焦后根据助记码只能找到一个，2.失焦后根据助记码找到了多个
+			var txtObj=document.getElementById("info");
+			var txt=txtObj.value;
+			
+			var opts=[]; //用来存放所有满足助记码的选项
+			var reg=new RegExp('(\\s|^)?'+txt+'(\\s|$)?');
+			
+			for(var attr in shortcut){
+				//判断当前的属性是否跟用户输入的助记码完全一样，如果一样则说明已经找到，故结束程序
+				//if(attr==txt){ //如果用户输入的助记码跟当前对象的属性相等
+				//	txtObj.value=shortcut[attr];
+				//	return;
+				//}
+	
+				//如果当前的属性跟用户输入的助记码不完全一样，则从当前属性字符串中查找，是否含有用户输入的助记码
+				//如果当前属性字符串中含有用户输入的助记码字符或字符串，则将其存入数组，以便用户做最后的选择。
+				//if(attr.indexOf(txt)!=-1){ //判断当前属性中是否含有用户输入的助记码
+				//	opts[opts.length]=shortcut[attr]; //opts[0]  opts[1]
+ 				//}
+				if(reg.test(attr)){ //判断当前属性中是否含有用户输入的助记码
+					opts[opts.length]=shortcut[attr]; //opts[0]  opts[1]
+ 				}
+			}
+			
+			//如果找到了完全一样的，则程序在for循环中就已经结束，如果在for循环没有结束，说明没有找到完全匹配的，
+			//则判断是否有可选的项
+			if(opts.length>1){ //如果此时可选数组的长度是大于0,说有有可选项，则此时需要构建一个下拉对象
+				var selectObj=document.createElement("select");
+				
+				var objStyle=selectObj.style;
+				objStyle.position="absolute";
+				objStyle.top=txtObj.offsetTop;
+				objStyle.left=txtObj.offsetLeft+txtObj.offsetWidth;
+				
+				//构建下拉选项
+				var opt;
+				opt=document.createElement("option");
+				opt.text="请选择";
+				opt.value=opt.text;
+				
+				selectObj.add(opt);
+				
+				for(var i=0;i<opts.length;i++){
+					opt=document.createElement("option");
+					opt.text=opts[i];
+					opt.value=opt.text;
+					selectObj.add(opt);
+				}
+				document.body.appendChild(selectObj);
+				/*
+                selectObj.txtObj = txtObj;  //将文本框对象跟当前下拉对象绑定到一起
+                selectObj.onchange=function(){
+					this.txtObj.value=this.value;
+					this.removeNode(true);
+				}*/
+				selectObj.onchange=function(){
+					document.getElementById("info").value=this.value; //将用户选中的值写入到文本框
+					document.body.removeChild(this); //将当前下拉对象移除
+				}
+			}else if(opts.length==1){
+				txtObj.value=opts[0];
+			}else{
+				txtObj.value="";
+			}
+		}
+		
+	</script>
+</head>
+	
+<body>
+	<input id="info" onBlur="shortcutCode()" />
+</body>
+</html>

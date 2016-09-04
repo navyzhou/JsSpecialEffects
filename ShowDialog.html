@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>窗口效果</title>
+<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+/*
+	$(document).ready(function() {
+        
+    });
+*/
+	
+	$(function(){
+		var centerwin=$("#center").mywin({left:"center",top:"center"});
+		var rightwin=$("#right").mywin({left:"right",top:"bottom"},function(){rightwin.slideUp("slow")}); //向上慢慢隐藏
+		var leftwin=$("#left").mywin({left:"left",top:"bottom"},function(){leftwin.slideUp("slow")}); //向上慢慢隐藏
+		$("#centerpop").click(function(){
+			//鼠标点击按钮后，把id为conter的窗口显示在页面中间
+			//计算屏幕中间的左边距和右边边距即两者中心值一样
+			//如果有滚动条需加上滚动条滚动的距离
+			centerwin.show("slow");
+		});
+		
+		$("#rightpop").click(function(){
+			rightwin.slideDown("slow"); //向下慢慢显示
+		});
+		
+		$("#leftpop").click(function(){
+			leftwin.slideDown("slow"); //向下慢慢显示
+		});
+	});
+	
+	/**
+	*编写一个创建，即一个方法,用来获取浏览器、滚动条和它自己的宽和高,用来定位,传给我显示的位置
+	*@param position包含两个属性，一个是left,一个是top
+	*@param hidefunc隐藏的方式
+	*/
+	$.fn.mywin=function(position,hidefunc){
+		if(position && position instanceof Object){//position不为空且是一个对象
+			var positionleft=position.left;
+			var positiontop=position.top;
+			var currentwin=this;
+			
+			var reg=/(px)/ig;
+			
+			positionleft=positionleft.replace(reg,"");
+			positiontop=positiontop.replace(reg,"");
+			
+			if(!isNaN(positionleft)){
+				positionleft=parseInt(positionleft);
+			}
+			
+			if(!isNaN(positiontop)){
+				positiontop=parseInt(positiontop);
+			}
+			
+			var	mywidth=currentwin.outerWidth(true); 
+			var	myheight=currentwin.outerHeight(true);
+			//var mywidth=obj.width();  //显示的窗口的宽度
+			//var myheight=obj.height(); //显示的窗口的高度
+		
+			var left;
+			var top;
+			
+			var width; //浏览器可视区域的宽度
+			var height; //浏览器可视区域的高度
+			var scrollleft;//滚动条距左边的距离
+			var scrolltop;//滚动条距顶部的距离
+			
+			//获取浏览器和滚动条的距离
+			function getWinInfo(){
+				width=$(window).width(); //浏览器可视区域的宽度
+				height=$(window).height(); //浏览器可视区域的高度
+				scrollleft=$(window).scrollLeft();//滚动条距左边的距离
+				scrolltop=$(window).scrollTop();//滚动条距顶部的距离
+			}
+			
+			function calleft(positionleft,scrollleft,width,mywidth){//显示位置 滚动条左边距  浏览器可见区宽度  显示的层的宽度
+				if(positionleft!="" && typeof(positionleft)=="string"){
+					if(positionleft=="center"){
+						left=scrollleft+(width-mywidth)/2;
+					}else if(positionleft=="left"){
+						left=scrollleft;
+					}else if(positionleft=="right"){
+						left=scrollleft+width-mywidth;
+					}else{
+						left=scrollleft+(width-mywidth)/2;
+					}
+				}else if(positionleft!="" && typeof(positionleft)=="number"){
+					left=positionleft;
+				}else{
+					left=0;
+				}
+				//currentwin.data("positionleft",positionleft);//将位置存起来，便于浏览器窗口大小改变或滚动条滚动时重新定位使用
+			}
+			
+			function caltop(positiontop,scrolltop,height,myheight){
+				if(positiontop!="" && typeof(positiontop)=="string"){
+					if(positiontop=="center"){
+						top=scrolltop+(height-myheight)/2;
+					}else if(positiontop=="top"){
+						top=scrolltop;
+					}else if(positiontop=="bottom"){
+						top=scrolltop+height-myheight;
+					}else{
+						top=scrolltop+(height-myheight)/2;
+					}
+				}else if(positiontop!="" && typeof(positiontop)=="number"){
+					top=positiontop;
+				}else{
+					top=0;
+				}
+				//currentwin.data("positiontop",positiontop);//将位置存起来，便于浏览器窗口大小改变或滚动条滚动时重新定位使用
+			}
+			
+			getWinInfo();
+			calleft(positionleft,scrollleft,width,mywidth);  //初始化是调用一次
+			caltop(positiontop,scrolltop,height,myheight);
+			
+			//浏览器滚动条滚动时
+			var scrollTimeout; //延迟处理
+			$(window).scroll(function(){
+				//clearTimeOut(scrollTimeout);
+				//scrollTimeout=setTimeout(function(){
+					getWinInfo();
+					calleft(positionleft,scrollleft,width,mywidth); 
+					caltop(positiontop,scrolltop,height,myheight);
+					//currentwin.css("left",left).css("top",top);//当窗口大小改变时蹦一下就过去了，不好看
+					currentwin.animate({left:left,top:top},300);  //延迟300毫秒后改变left和top，这样就会以动画的形式移动窗口
+				//},300);
+			});
+			
+			//浏览器窗口改变大小时
+			$(window).resize(function(){
+				getWinInfo();
+				calleft(positionleft,scrollleft,width,mywidth); 
+				caltop(positiontop,scrolltop,height,myheight);
+				//currentwin.css("left",left).css("top",top);//当窗口大小改变时蹦一下就过去了，不好看
+				currentwin.animate({left:left,top:top},300);  //延迟300毫秒后改变left和top的值
+			});
+			
+			currentwin.css("left",left).css("top",top);
+			//点击关闭按钮图片时关闭层
+			this.children(".title").children("img").click(function(){
+				if(!hidefunc){//默认为慢慢隐藏
+					currentwin.hide("slow");
+				}else{
+					hidefunc();
+				}
+			});
+		}
+		
+		//$(".title img").bind("click",function(){
+			//它的父类(title)的父类(window)
+			//$(this).parent().parent().css("display","none").hide("slow");
+		//});
+		
+		return this; //一定要把当前对象返回回去，不然调用此方法后，后面的代码不会再执行
+	}
+</script>
+<style type="text/css">
+	*{
+		font-size:12px;
+	}
+	.window{
+		width:300px;
+		background:#D0DEF0;
+		padding:4px;
+		margin-top:10px;
+		position:absolute;/*控制窗口绝对定位*/
+		display:none;
+	}
+	
+	.title{
+		line-height:20px;
+		height:20px;
+		padding-left:2px;
+	}
+	
+	.content{
+		height:200px;
+		background:white;
+		overflow:auto;
+		padding-left:2px;
+		line-height:24px;
+	}
+	
+	.title img{
+		width:16px;
+		height:16px;
+		float:right;
+		cursor:pointer;/*鼠标的形状*/
+	}
+</style>
+</head>
+
+<body>
+	<input type="button" value="左下角显示窗口" id="leftpop" />
+    <input type="button" value="中间显示窗口" id="centerpop" />
+    <input type="button" value="右下角显示窗口" id="rightpop" />
+   	<!--中间-->
+    <div class="window" id="center">
+		<div class="title">
+            <img title="关闭" src="images/close_delete_2.png"/>
+       		我是中间显示窗口的标题栏
+        </div>
+        <div class="content">
+        	我是中间显示的内容区          
+        </div> 
+    </div>
+    
+    <!--左边-->
+    <div class="window" id="left">
+		<div class="title">
+         	<img title="关闭" src="images/close_delete_2.png"/>
+        	我是左边显示窗口的标题栏
+        </div>
+        <div class="content">
+        	我是左边显示的内容区        
+        </div> 
+    </div>
+    
+     <!--右边-->
+    <div class="window" id="right">
+		<div class="title">
+       		<img title="关闭" src="images/close_delete_2.png"/>
+        	我是右边显示窗口的标题栏 
+        </div>
+        <div class="content">
+        	我是右边显示的内容区        
+        </div> 
+    </div>
+    
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>身份证放大</title>
+<script>
+	function $(id){
+		return document.getElementById(id);
+	}
+
+	function showBigInfo(obj){
+		var bigObj;
+		if(!$("bigInfo")){
+			bigObj=document.createElement("span");
+			bigObj.setAttribute("id","bigInfo");
+			bigObj.style.position="absolute";
+			bigObj.style.border="1px solid #F93";
+			bigObj.style.borderRadius="2px";
+			bigObj.style.color="red";
+			bigObj.style.fontSize="26px";
+			bigObj.style.fontWeight="bold";
+			bigObj.style.padding="4px";
+			bigObj.style.display="none";
+			document.body.appendChild(bigObj);
+			
+			obj.onblur=function(){
+				$("bigInfo").style.display="none";
+			}
+			
+			obj.onfocus=function(){
+				$("bigInfo").style.display="block";
+			}
+		}else{
+			bigObj=$("bigInfo");
+		}
+		bigObj.style.display="block";
+		
+		var str="";
+		var info=obj.value;
+		for(var i=0;i<info.length;i+=4){
+			str+=info.substr(i,4)+" ";
+		}
+		bigObj.innerHTML=str; 
+		
+		if(obj.offsetTop<50){ //放大框在下方显示
+			bigObj.style.top=(obj.offsetTop+obj.offsetHeight+2)+"px";
+		}else{ //放大框在上方显示
+			bigObj.style.top=(obj.offsetTop-bigObj.offsetHeight-2)+"px";
+		}
+		
+		bigObj.style.left=(obj.offsetLeft+obj.offsetWidth/2-bigObj.offsetWidth/2)+"px";
+	}
+	
+</script>
+</head>
+
+<body>
+	<br /><br /><br /><br /><br /><br />
+	<center>请输入身份证号码：<input type="text" onKeyUp="showBigInfo(this)" maxlength="18" size="30"/></center>
+</body>
+</html>
